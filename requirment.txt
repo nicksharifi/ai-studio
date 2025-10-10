@@ -1,0 +1,13 @@
+sqlalchemy
+psycopg2-binary
+alembic
+ffmpeg-python
+flask
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+schedule
+
+pytube
+boto3

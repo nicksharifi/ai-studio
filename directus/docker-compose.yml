@@ -1,0 +1,74 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: ai_studio_db
+      POSTGRES_PASSWORD: 'KiramToBeyteRahbari'
+      POSTGRES_DB: ai_studio
+    networks:
+      - ai-studio-network
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ariyansharifi@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 'KiramToBeyteRahbari'
+    ports:
+      - "8080:80"
+    restart: always
+    depends_on:
+      - postgres
+    networks:
+      - ai-studio-network
+
+  directus:
+    image: directus/directus:latest
+    ports:
+      - 80:8055
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./database:/directus/database
+      # If you want to load extensions from the host
+      # - ./extensions:/directus/extensions
+    restart: always
+    depends_on:
+      - pgadmin
+    environment:
+      KEY: '255d861b-5ea1-5996-9aa3-922530ec40b1'
+      SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e263'
+
+      DB_CLIENT: 'postgres'
+      DB_HOST: 'postgres'
+      DB_PORT: '5432'
+      DB_DATABASE: 'ai_studio'
+      DB_USER: 'ai_studio_db'
+      DB_PASSWORD: 'KiramToBeyteRahbari'
+
+      STORAGE_LOCATIONS: s3
+      STORAGE_S3_DRIVER: s3
+      STORAGE_S3_KEY: 8fe8b7150f68b42c1fba73440908be74
+      STORAGE_S3_SECRET: b7aabb72d4a09505e291cf44c9afeda08bd8d98ade9bbd6909e056f54647ed2e
+      STORAGE_S3_ENDPOINT: https://d9ca16577feda38675ff542bc60aaad6.r2.cloudflarestorage.com
+      STORAGE_S3_BUCKET: ai-studio
+      STORAGE_S3_REGION: auto
+      STORAGE_S3_ROOT: assets
+      # token value X_EgPbkHEsNdKlgUKQ-5JIqVOk93udzPQfi18BT_
+
+      # STORAGE_LOCATIONS: 'local'
+      # STORAGE_LOCAL_ROOT: './files'
+
+      ADMIN_EMAIL: 'ariyansharifi@gmail.com'
+      ADMIN_PASSWORD: 'KiramToBeyteRahbari'
+      
+    networks:
+      - ai-studio-network
+
+networks:
+  ai-studio-network:
+    name: ai-studio-network

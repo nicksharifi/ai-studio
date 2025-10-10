@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for AI Studio Automation Service
+
+[Timer]
+OnBootSec=30s
+Unit=ai-studio.service
+
+[Install]
+WantedBy=timers.target
