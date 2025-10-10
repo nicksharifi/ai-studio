@@ -63,8 +63,8 @@ services:
       # STORAGE_LOCATIONS: 'local'
       # STORAGE_LOCAL_ROOT: './files'
 
-      ADMIN_EMAIL: 'ariyansharifi@gmail.com'
-      ADMIN_PASSWORD: 'KiramToBeyteRahbari'
+      ADMIN_EMAIL: 'armansharifi78@gmail.com'
+      ADMIN_PASSWORD: ''
       
     networks:
       - ai-studio-network

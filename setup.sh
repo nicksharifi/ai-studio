@@ -32,7 +32,7 @@ fi
 
 # Set the certificate details
 COMPANY_NAME="ai-studio"
-EMAIL="ariyansharifi@gmail.com"
+EMAIL="armansharifi78@gmail.com"
 
 # Generate the certificate
 openssl req -x509 -newkey rsa:4096 -nodes -keyout "$CERT_DIR/key.pem" -out "$CERT_DIR/cert.pem" -days 3650 \
