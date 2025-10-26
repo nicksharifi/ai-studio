@@ -3,12 +3,12 @@ import pathlib
 import time
 
 from db.session import make
-from db.youtube_channel import YouTubeChannel
+from db.channel import Channel
 
 from studio import Studio
 from studio_vertical_mixer import StudioVerticalMixer
 from cleanup_manager import CleanupManager
-from publisher_youtube import PublisherYoutube
+from publisher_factory import create_publisher_for_channel
 
 logger = logging.getLogger(__name__)
 log_format = '%(asctime)s - %(levelname)s - [%(funcName)s] - %(message)s'
@@ -20,10 +20,12 @@ current_folder_path = pathlib.Path(__file__).parent.resolve()
 
 def publish_avaliable_video():
     db_session = make()
-    yt_channels = db_session.query(YouTubeChannel).filter(YouTubeChannel.active == True).all()
-    for channel in yt_channels:
-        pub = PublisherYoutube(channel.id)
-        pub.publish()
+    channels = db_session.query(Channel).filter(Channel.active == True).all()
+    for channel in channels:
+        publisher = create_publisher_for_channel(channel)
+        if not publisher:
+            continue
+        publisher.publish()
 
 
 if __name__ == "__main__":
