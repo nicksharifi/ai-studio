@@ -4,7 +4,6 @@ import schedule
 
 from db.youtube_channel import YouTubeChannel
 from db.video_fusion import VideoFusion
-from db.video_channel import VideoChannel
 from db.video_channel import VideoChannel, VideoType
 from utils.video_editor import VideoEditor
 from utils import youtube_uploader
@@ -76,7 +75,7 @@ class PublisherYoutube(publisher.Publisher):
             return in_str
         return f"{in_str} {hashtag}"
 
-    def uploade_video(self, video: VideoFusion, publish_time: datetime.datetime = None):
+    def upload_video(self, video: VideoFusion, publish_time: datetime.datetime = None):
         thumbnail = ""
         if video._thumbnail:
             thumbnail = video._thumbnail.path
@@ -105,7 +104,7 @@ class PublisherYoutube(publisher.Publisher):
             logger.warning(f"Failed to upload video_id = {video.id}")
             return ""
         if publish_time is None:
-            publish_time = datetime.datetime.now()
+            publish_time = datetime.datetime.now(datetime.timezone.utc)
             
         video_channel = VideoChannel(
             video_id=video.id,
@@ -127,7 +126,7 @@ class PublisherYoutube(publisher.Publisher):
         origin_id=None,
         publish_time: datetime.datetime = None,
     ):
-        temp = self.uploade_video(video, publish_time)
+        temp = self.upload_video(video, publish_time)
         if not temp:
             return
 
@@ -152,7 +151,7 @@ class PublisherYoutube(publisher.Publisher):
             return
         candidate = candidates[0]
 
-        orign_video_channel = self.uploade_video(candidate,publish_time)
+        orign_video_channel = self.upload_video(candidate,publish_time)
         if not orign_video_channel:
             return
 

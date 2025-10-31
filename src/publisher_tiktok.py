@@ -1,7 +1,5 @@
 import datetime
 import logging
-
-from db.session import make
 from db.video_fusion import VideoFusion
 from db.video_channel import VideoChannel, VideoType
 from db.tag import Tag
@@ -18,15 +16,19 @@ class PublisherTikTok(publisher.Publisher):
     Minimal TikTok publisher placeholder.
     - Publishes short videos only (<= 60s assumed).
     - Records an entry in VideoChannel with a synthetic URL.
-    - Real API integration can replace `uploade_video` later.
+    - Real API integration can replace `upload_video` later.
     """
 
     def __init__(self, _channel_id: int) -> None:
         super().__init__(_channel_id)
 
-    def uploade_video(self, video: VideoFusion, publish_time: datetime.datetime | None = None):
+    def upload_video(self, video: VideoFusion, publish_time: datetime.datetime | None = None):
         # Enforce short duration compliance for TikTok
-        duration = VideoEditor.get_duration(video._video.path)
+        try:
+            duration = VideoEditor.get_duration(video._video.path)
+        except Exception as exc:
+            logger.warning(f"TikTok: failed to probe duration for video id={video.id}: {exc}")
+            return None
         if duration > 60:
             logger.warning(
                 f"TikTok: video id={video.id} exceeds 60s (duration={duration:.2f}). Skipping upload for now."
@@ -34,7 +36,7 @@ class PublisherTikTok(publisher.Publisher):
             return None
 
         if publish_time is None:
-            publish_time = datetime.datetime.utcnow()
+            publish_time = datetime.datetime.now(datetime.timezone.utc)
 
         # Produce a synthetic URL to track the mapping. Replace with real url once API implemented.
         synthetic_url = f"tiktok://video/{video.id}"
@@ -76,7 +78,7 @@ class PublisherTikTok(publisher.Publisher):
                 return
 
         candidate = candidates[0]
-        self.uploade_video(candidate)
+        self.upload_video(candidate)
 
     def collect_stats(self):
         # Placeholder: wire into TikTok stats API if/when available

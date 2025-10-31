@@ -1,7 +1,5 @@
 import datetime
 import logging
-
-from db.session import make
 from db.video_fusion import VideoFusion
 from db.video_channel import VideoChannel, VideoType
 from db.tag import Tag
@@ -18,14 +16,18 @@ class PublisherInstagram(publisher.Publisher):
     Minimal Instagram Reels publisher placeholder.
     - Publishes short videos only (<= 60s assumed for Reels consistency).
     - Records an entry in VideoChannel with a synthetic URL.
-    - Real API integration can replace `uploade_video` later.
+    - Real API integration can replace `upload_video` later.
     """
 
     def __init__(self, _channel_id: int) -> None:
         super().__init__(_channel_id)
 
-    def uploade_video(self, video: VideoFusion, publish_time: datetime.datetime | None = None):
-        duration = VideoEditor.get_duration(video._video.path)
+    def upload_video(self, video: VideoFusion, publish_time: datetime.datetime | None = None):
+        try:
+            duration = VideoEditor.get_duration(video._video.path)
+        except Exception as exc:
+            logger.warning(f"Instagram: failed to probe duration for video id={video.id}: {exc}")
+            return None
         if duration > 60:
             logger.warning(
                 f"Instagram: video id={video.id} exceeds 60s (duration={duration:.2f}). Skipping upload for now."
@@ -33,7 +35,7 @@ class PublisherInstagram(publisher.Publisher):
             return None
 
         if publish_time is None:
-            publish_time = datetime.datetime.utcnow()
+            publish_time = datetime.datetime.now(datetime.timezone.utc)
 
         synthetic_url = f"instagram://reel/{video.id}"
 
@@ -73,7 +75,7 @@ class PublisherInstagram(publisher.Publisher):
                 return
 
         candidate = candidates[0]
-        self.uploade_video(candidate)
+        self.upload_video(candidate)
 
     def collect_stats(self):
         # Placeholder: wire into Instagram Insights API when available

@@ -34,10 +34,11 @@ def get_work_dir(sub_folder=""):
 
 TMP_FOLDER = get_work_dir("db_backup_manager")
 
-STORAGE_S3_KEY = "8fe8b7150f68b42c1fba73440908be74"
-STORAGE_S3_SECRET = "b7aabb72d4a09505e291cf44c9afeda08bd8d98ade9bbd6909e056f54647ed2e"
-STORAGE_S3_ENDPOINT = "https://d9ca16577feda38675ff542bc60aaad6.r2.cloudflarestorage.com"
-BUCKET = "ai-studio"
+# Read all S3/R2 settings strictly from environment
+STORAGE_S3_KEY = os.getenv("STORAGE_S3_KEY")
+STORAGE_S3_SECRET = os.getenv("STORAGE_S3_SECRET")
+STORAGE_S3_ENDPOINT = os.getenv("STORAGE_S3_ENDPOINT")
+BUCKET = os.getenv("STORAGE_S3_BUCKET")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -131,6 +132,19 @@ class BackupManager:
         if object_name is None:
             object_name = file_name
 
+        # Validate required env configuration
+        missing = [
+            name for name, val in {
+                "STORAGE_S3_KEY": STORAGE_S3_KEY,
+                "STORAGE_S3_SECRET": STORAGE_S3_SECRET,
+                "STORAGE_S3_ENDPOINT": STORAGE_S3_ENDPOINT,
+                "STORAGE_S3_BUCKET": BUCKET,
+            }.items() if not val
+        ]
+        if missing:
+            logger.error(f"Missing required S3 env vars: {', '.join(missing)}")
+            return False
+
         # Configure the S3 client
         s3_client = boto3.client(
             "s3",
@@ -144,8 +158,8 @@ class BackupManager:
         # Upload the file
         try:
             s3_client.upload_file(file_name, BUCKET, object_name)
-        except Exception as e:
-            print(e)
+        except Exception:
+            logger.exception("S3 upload failed")
             return False
         return True
 

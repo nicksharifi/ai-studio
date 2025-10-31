@@ -44,18 +44,6 @@ class VideoEditor:
         return width, height
 
     @staticmethod
-    def get_width_height(video_path):
-        # Probe video file to get stream information
-        video_stream = VideoEditor.get_metadata(video_path)
-
-        # Extract width and height
-        width = int(video_stream["width"])
-        height = int(video_stream["height"])
-
-        # Calculate aspect ratio
-        return width, height
-
-    @staticmethod
     def get_duration(video_path) -> float:
         metadata = VideoEditor.get_metadata(video_path)
         if "duration" in metadata:
@@ -88,13 +76,6 @@ class VideoEditor:
         scale_width, scale_height = VideoEditor.calculate_scale_dimensions(width, height, new_width, new_height)
 
         input_video = ffmpeg.input(video_path)
-        (
-            ffmpeg.input(video_path)
-            .filter("scale", new_width, new_height)
-            .output(input_video.audio, out_video_path, vcodec=vcodec.value, acodec="aac", r=frame_rate)
-            .global_args("-loglevel", ffmpeg_log_level)
-            .run(overwrite_output=True)
-        )
 
         # Calculate padding
         pad_x = (new_width - scale_width) // 2
